@@ -8,7 +8,7 @@
     "build": {
       "cmds": [
         "composer install --optimize-autoloader --no-interaction",
-        "npm ci",
+        "npm ci --omit=dev",
         "npm run build",
         "php artisan config:cache",
         "php artisan route:cache",
