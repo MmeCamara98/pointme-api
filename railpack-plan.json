@@ -1,33 +1,11 @@
 {
   "build": {
-    "extensions": [
-      "ctype",
-      "curl",
-      "dom",
-      "fileinfo",
-      "filter",
-      "hash",
-      "mbstring",
-      "openssl",
-      "pcre",
-      "pdo",
-      "session",
-      "tokenizer",
-      "xml",
-      "intl",
-      "zip"
-    ],
-    "cmds": [
-      "composer install --optimize-autoloader --no-scripts --no-interaction",
-      "php artisan config:cache",
-      "php artisan route:cache",
-      "php artisan view:cache"
-    ]
+    "builder": "nixpacks",
+    "buildCommand": "composer install --optimize-autoloader --no-scripts --no-interaction"
   },
   "deploy": {
-    "cmds": [
-      "php artisan migrate --force",
-      "php artisan serve --host=0.0.0.0 --port=8080"
-    ]
+    "startCommand": "php artisan serve --host=0.0.0.0 --port=$PORT",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300
   }
 }
