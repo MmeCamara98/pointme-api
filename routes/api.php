@@ -24,3 +24,6 @@ Route::group(['middleware' => ['auth:stagiaire']], function () {
     Route::get('/stagiaire/profile', [AuthStagiaireController::class, 'profile']);
     Route::post('/stagiaire/logout', [AuthStagiaireController::class, 'logout']);
 });
+Route::get('/health', function() {
+    return response()->json(['status' => 'ok']);
+});
