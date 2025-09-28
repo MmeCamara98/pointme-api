@@ -1,7 +1,23 @@
 {
   "build": {
+    "extensions": [
+      "ctype",
+      "curl",
+      "dom",
+      "fileinfo",
+      "filter",
+      "hash",
+      "mbstring",
+      "openssl",
+      "pcre",
+      "pdo",
+      "session",
+      "tokenizer",
+      "xml",
+      "intl",
+      "zip"
+    ],
     "cmds": [
-      "install-php-extensions intl zip",
       "composer install --optimize-autoloader --no-scripts --no-interaction",
       "npm ci",
       "npm run build",
