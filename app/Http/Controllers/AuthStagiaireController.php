@@ -70,4 +70,7 @@ class AuthStagiaireController extends Controller
         auth('stagiaire')->logout();
         return response()->json(['message' => 'Déconnexion réussie']);
     }
+    Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+});
 }
