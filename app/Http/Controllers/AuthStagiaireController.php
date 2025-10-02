@@ -35,7 +35,8 @@ class AuthStagiaireController extends Controller
             'promotion' => $request->promotion,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'password' => $request->password, // Le mutator s'occupera du hashage
+            'password' => Hash::make($request->password),
+ // Le mutator s'occupera du hashage
         ]);
 
         $token = auth('stagiaire')->login($stagiaire);
@@ -70,7 +71,4 @@ class AuthStagiaireController extends Controller
         auth('stagiaire')->logout();
         return response()->json(['message' => 'Déconnexion réussie']);
     }
-    Route::get('/health', function () {
-    return response()->json(['status' => 'ok']);
-});
 }
