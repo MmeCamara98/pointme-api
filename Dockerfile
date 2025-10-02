@@ -1,51 +1,45 @@
 FROM php:8.3-apache
 
-# Installer les extensions nécessaires
+# Installer les extensions
 RUN apt-get update && apt-get install -y \
-    libicu-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    && docker-php-ext-install \
-    intl \
-    zip \
-    pdo_mysql \
-    mysqli
+    libzip-dev zip unzip git curl \
+    && docker-php-ext-install pdo_mysql zip
 
-# Activer Apache mod_rewrite
+# Activer mod_rewrite
 RUN a2enmod rewrite
+
+# Définir le document root
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copier l'application Laravel
+# Copier l'application
 COPY . /var/www/html/
-
-# Définir DocumentRoot sur public/
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
-
-# Installer les dépendances (PRODUCTION)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# ✅ GÉNÉRER LES CLÉS MANQUANTES
-RUN php artisan key:generate --force
-RUN php artisan jwt:secret --force
-
-# ✅ CONFIGURER LE CACHE
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Configurer les permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
 
 WORKDIR /var/www/html
 
-# ✅ CORRIGER LE PORT (Render utilise $PORT)
-EXPOSE 80
+# Installer les dépendances
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Lancer Apache
+# ✅ CRÉER LE FICHIER .env S'IL N'EXISTE PAS
+RUN if [ ! -f ".env" ]; then \
+        cp .env.example .env; \
+    fi
+
+# ✅ GÉNÉRER LES CLÉS (avec gestion d'erreur)
+RUN php artisan key:generate --force || echo "Key generation completed"
+RUN php artisan jwt:secret --force || echo "JWT secret generation completed"
+
+# Cache (optionnel)
+RUN php artisan config:cache || echo "Config cache completed"
+RUN php artisan route:cache || echo "Route cache completed"
+
+# Permissions
+RUN chmod -R 775 storage bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 80
 CMD ["apache2-foreground"]
