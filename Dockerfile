@@ -15,8 +15,12 @@ RUN apt-get update && apt-get install -y \
 # Activer Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Copier l'application
+# Copier l'application Laravel
 COPY . /var/www/html/
+
+# Définir DocumentRoot sur public/
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
+    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -31,4 +35,8 @@ RUN chown -R www-data:www-data /var/www/html \
 
 WORKDIR /var/www/html
 
-EXPOSE 8080 
+# Exposer le port 8080
+EXPOSE 8080
+
+# Lancer Apache
+CMD ["apache2-foreground"]
