@@ -220,6 +220,25 @@ ENV APP_ENV=production \
     LOG_CHANNEL=stack \
     LOG_LEVEL=info
 
+    
+# =============================================================================
+# INSTALLATION NODE.JS ET BUILD FRONTEND (VITE)
+# =============================================================================
+
+# Installer Node.js + npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Installer les dépendances front-end
+RUN npm install
+
+# Compiler les assets pour la production
+RUN npm run build
+
+# Vérifier que le dossier public/build est bien présent
+RUN ls -la public/build || (echo "❌ Build Vite manquant !" && exit 1)
+
+
 # =============================================================================
 # INSTRUCTIONS D'UTILISATION
 # =============================================================================
