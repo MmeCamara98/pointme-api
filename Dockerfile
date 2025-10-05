@@ -198,10 +198,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 # =============================================================================
 # EXPOSITION DU PORT
 # =============================================================================
-EXPOSE 8080
-ENV PORT=8080
-CMD sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf && apache2-foreground
-
+EXPOSE 80
 
 # =============================================================================
 # POINT D'ENTRÉE
@@ -222,25 +219,6 @@ ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stack \
     LOG_LEVEL=info
-
-    
-# =============================================================================
-# INSTALLATION NODE.JS ET BUILD FRONTEND (VITE)
-# =============================================================================
-
-# Installer Node.js + npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
-# Installer les dépendances front-end
-RUN npm install
-
-# Compiler les assets pour la production
-RUN npm run build
-
-# Vérifier que le dossier public/build est bien présent
-RUN ls -la public/build || (echo "❌ Build Vite manquant !" && exit 1)
-
 
 # =============================================================================
 # INSTRUCTIONS D'UTILISATION
@@ -299,4 +277,4 @@ RUN ls -la public/build || (echo "❌ Build Vite manquant !" && exit 1)
 # docker-compose exec app chown -R www-data:www-data storage bootstrap/cache
 # docker-compose exec app chmod -R 775 storage bootstrap/cache
 #
-# =============================================================================
+# =========================================================
