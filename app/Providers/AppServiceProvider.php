@@ -19,10 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // IMPORTANT pour Filament sur Render
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-            $this->app['url']->forceRootUrl(config('app.url'));
-        }
+        FilamentAsset::register([
+        'app.css' => asset('build/assets/app-DUJd_Yy-.css'),
+        'app.js' => asset('build/assets/app-Bj43h_rG.js'),
+    ]);
     }
-    
+}    
