@@ -198,7 +198,10 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 # =============================================================================
 # EXPOSITION DU PORT
 # =============================================================================
-EXPOSE 80
+EXPOSE 8080
+ENV PORT=8080
+CMD sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf && apache2-foreground
+
 
 # =============================================================================
 # POINT D'ENTRÉE
