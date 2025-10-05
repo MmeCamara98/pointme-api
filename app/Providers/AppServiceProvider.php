@@ -19,10 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // IMPORTANT pour Filament sur Render
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-            $this->app['url']->forceRootUrl(config('app.url'));
-        }
+        
     }
-}    
+}
