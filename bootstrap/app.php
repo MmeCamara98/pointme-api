@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
+     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*'); // AJOUTEZ CECI
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

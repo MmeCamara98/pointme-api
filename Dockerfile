@@ -87,14 +87,7 @@ RUN chown -R www-data:www-data /var/www/html \
  && chmod -R 775 /var/www/html/bootstrap/cache
 
 # ================================================================
-# 🔑 CONFIGURATION MINIMALE (sans commandes qui peuvent échouer)
-# ================================================================
-# Ne PAS exécuter key:generate, storage:link, config:cache ici
-# Car ces commandes nécessitent APP_KEY et peuvent échouer
-# Tout sera fait au démarrage du conteneur
-
-# ================================================================
-# 🏁 SCRIPT DE DÉMARRAGE AMÉLIORÉ
+# 🏁 SCRIPT DE DÉMARRAGE AMÉLIORÉ AVEC MIGRATIONS
 # ================================================================
 RUN printf '#!/bin/bash\n\
 set -e\n\
@@ -134,6 +127,32 @@ fi\n\
 if [ ! -L public/storage ]; then\n\
   echo "🔗 Création du lien symbolique storage..."\n\
   php artisan storage:link --force 2>/dev/null || echo "Lien storage déjà existant"\n\
+fi\n\
+\n\
+# Attendre que la base de données soit prête\n\
+echo "⏳ Attente de la base de données..."\n\
+MAX_TRIES=30\n\
+COUNT=0\n\
+until php artisan migrate:status 2>/dev/null || [ $COUNT -eq $MAX_TRIES ]; do\n\
+  echo "   Tentative $((COUNT+1))/$MAX_TRIES..."\n\
+  COUNT=$((COUNT+1))\n\
+  sleep 2\n\
+done\n\
+\n\
+if [ $COUNT -eq $MAX_TRIES ]; then\n\
+  echo "⚠️  Base de données non accessible après $MAX_TRIES tentatives"\n\
+  echo "   Démarrage sans migrations..."\n\
+else\n\
+  echo "✅ Base de données accessible !"\n\
+  \n\
+  # Créer les tables de session et cache\n\
+  echo "📊 Création des tables session et cache..."\n\
+  php artisan session:table 2>/dev/null || echo "   Table sessions existe déjà"\n\
+  php artisan cache:table 2>/dev/null || echo "   Table cache existe déjà"\n\
+  \n\
+  # Exécuter les migrations\n\
+  echo "🗄️  Exécution des migrations..."\n\
+  php artisan migrate --force 2>/dev/null || echo "   Migrations déjà effectuées"\n\
 fi\n\
 \n\
 # Publier assets Filament si disponible\n\
